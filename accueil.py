@@ -10,7 +10,7 @@ class Acceuill(tk.CTkFrame):
         titre.pack(pady=50)
 
         button_contenaire = tk.CTkFrame(self, fg_color="transparent")
-        button_contenaire.pack(pady=20)
+        button_contenaire.pack()
 
 
         materiels_button = tk.CTkButton(

@@ -1,8 +1,10 @@
 import customtkinter as tk
 from accueil import  Acceuill
-tk.set_default_color_theme("green")
+from ajouter import AjouterMateriel
 
 tk.set_appearance_mode('dark')
+tk.set_default_color_theme("green")
+
 app = tk.CTk()
 app.attributes('-zoomed', True)
 
@@ -10,7 +12,8 @@ def Open_Materiels():
     print("waiting For it")
 
 def Ajouter_materiels():
-    print("waiting For it")
+    boite_dialogue_ajouter_materiel = AjouterMateriel(app)
+    boite_dialogue_ajouter_materiel.pack()
 
 
 app.title("Gestion Matériel | ISSTM")

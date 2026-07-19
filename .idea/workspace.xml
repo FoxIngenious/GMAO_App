@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="004796d5-01df-4203-98b5-2c51c692977a" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/sideBar.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="listesMateriels" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;FoxIngenious&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/FoxIngenious/GMAO_App.git&quot;,
+    &quot;accountId&quot;: &quot;abfd8fff-9669-46e2-abc5-3bf8315c8743&quot;
+  }
+}</component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="3.3901152335875405E-12" />
+      <entry key="MS500" value="0.008524452709740489" />
+      <entry key="S2" value="0.5292951034659775" />
+      <entry key="S5" value="1.3636762241793956" />
+      <entry key="S10" value="1.9795466087092968" />
+      <entry key="S30" value="3.223404610127954" />
+      <entry key="S60" value="5.534270287683355" />
+      <entry key="M2" value="10.24330117567933" />
+      <entry key="M5" value="22.19446668515283" />
+      <entry key="M10" value="36.85185622854075" />
+      <entry key="M15" value="47.71837888516569" />
+      <entry key="M30" value="70.08137510571022" />
+      <entry key="H1" value="94.14219667312817" />
+      <entry key="H2" value="113.92979232848074" />
+      <entry key="H4" value="127.01826002102455" />
+      <entry key="D1" value="140.10483750818435" />
+      <entry key="W1" value="142.58028403913656" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0000000000000002" />
+      <entry key="S30" value="1.000005403681052" />
+      <entry key="S60" value="1.0024850439430888" />
+      <entry key="M2" value="1.0695268021071414" />
+      <entry key="M5" value="1.752834225687064" />
+      <entry key="M10" value="2.880513453320743" />
+      <entry key="M15" value="3.6455487721423494" />
+      <entry key="M30" value="5.101666289606009" />
+      <entry key="H1" value="6.673898085934124" />
+      <entry key="H2" value="8.002071455935184" />
+      <entry key="H4" value="8.89568041952279" />
+      <entry key="D1" value="9.798993468406103" />
+      <entry key="W1" value="9.970835377999801" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="6.3712159598614775E-6" />
+      <entry key="MS500" value="0.09514158846550358" />
+      <entry key="S2" value="0.8352634573327622" />
+      <entry key="S5" value="1.7681870827299482" />
+      <entry key="S10" value="2.5513774583010727" />
+      <entry key="S30" value="4.013861599972087" />
+      <entry key="S60" value="6.394750424286653" />
+      <entry key="M2" value="11.208409113994174" />
+      <entry key="M5" value="23.86389925588841" />
+      <entry key="M10" value="39.66590061792906" />
+      <entry key="M15" value="51.309011259310914" />
+      <entry key="M30" value="75.14560306304051" />
+      <entry key="H1" value="100.79213427556988" />
+      <entry key="H2" value="121.91772470434009" />
+      <entry key="H4" value="135.90615516254255" />
+      <entry key="D1" value="149.90241396493275" />
+      <entry key="W1" value="152.5509137560172" />
+    </decayedShown>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3ImFHZpjHs5ycQRmffJmJXSHj0p" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.materiels.executor&quot;: &quot;Run&quot;,
+    &quot;Python.sideBar.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Side__bars&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/foxingenious/Documents/GMAO&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-821f704e66d9-5bd6d13a2a75-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-262.9437.214" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="004796d5-01df-4203-98b5-2c51c692977a" name="Changes" comment="" />
+      <created>1788361749949</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1788361749949</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

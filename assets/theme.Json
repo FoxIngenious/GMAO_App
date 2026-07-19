@@ -1,0 +1,135 @@
+{
+    "CTk": {
+        "fg_color": [
+            "#F5F5F5",
+            "#1A1A1A"
+        ]
+    },
+    "CTkToplevel": {
+        "fg_color": [
+            "#F5F5F5",
+            "#1A1A1A"
+        ]
+    },
+    "CTkFrame": {
+        "corner_radius": 10,
+        "fg_color": [
+            "#FFFFFF",
+            "#242424"
+        ],
+        "top_fg_color": [
+            "#FFFFFF",
+            "#242424"
+        ]
+    },
+    "CTkButton": {
+        "corner_radius": 8,
+        "fg_color": [
+            "#F97316",
+            "#EA580C"
+        ],
+        "hover_color": [
+            "#FB923C",
+            "#C2410C"
+        ],
+        "border_color": [
+            "#F97316",
+            "#EA580C"
+        ],
+        "text_color": [
+            "#FFFFFF",
+            "#FFFFFF"
+        ]
+    },
+    "CTkLabel": {
+        "text_color": [
+            "#1F2937",
+            "#F9FAFB"
+        ]
+    },
+    "CTkEntry": {
+        "corner_radius": 8,
+        "fg_color": [
+            "#FFFFFF",
+            "#333333"
+        ],
+        "border_color": [
+            "#F97316",
+            "#EA580C"
+        ],
+        "text_color": [
+            "#111827",
+            "#FFFFFF"
+        ]
+    },
+    "CTkCheckBox": {
+        "fg_color": [
+            "#F97316",
+            "#EA580C"
+        ],
+        "hover_color": [
+            "#FB923C",
+            "#C2410C"
+        ],
+        "border_color": [
+            "#F97316",
+            "#EA580C"
+        ]
+    },
+    "CTkOptionMenu": {
+        "fg_color": [
+            "#F97316",
+            "#EA580C"
+        ],
+        "button_color": [
+            "#EA580C",
+            "#C2410C"
+        ],
+        "button_hover_color": [
+            "#FB923C",
+            "#F97316"
+        ]
+    },
+    "CTkTabview": {
+        "fg_color": [
+            "#FFFFFF",
+            "#242424"
+        ],
+        "segmented_button_fg_color": [
+            "#FDBA74",
+            "#7C2D12"
+        ],
+        "segmented_button_selected_color": [
+            "#F97316",
+            "#EA580C"
+        ],
+        "segmented_button_selected_hover_color": [
+            "#FB923C",
+            "#C2410C"
+        ]
+    },
+    "CTkProgressBar": {
+        "fg_color": [
+            "#FED7AA",
+            "#431407"
+        ],
+        "progress_color": [
+            "#F97316",
+            "#EA580C"
+        ]
+    },
+    "CTkSlider": {
+        "fg_color": [
+            "#FED7AA",
+            "#431407"
+        ],
+        "button_color": [
+            "#F97316",
+            "#EA580C"
+        ],
+        "button_hover_color": [
+            "#FB923C",
+            "#C2410C"
+        ]
+    }
+}

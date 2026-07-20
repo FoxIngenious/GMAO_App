@@ -15,19 +15,21 @@ class AjouterMateriel(tk.CTkToplevel):
         input_contenaire = tk.CTkFrame(self, fg_color="transparent")
         input_contenaire.pack(expand=True)
 
-        def Enregistrer(self):
+        def Enregistrer():
             nom = self.nom.get()
             categories = self.categories.get()
             emplacements = self.emplacements.get()
             etas= self.etas.get()
 
             # Ajouter_materiel(nom, categories, emplacements, etas) // a importer from models.py
+            self.destroy()
 
-        def annuler(self):
+
+        def annuler():
             self.nom.delete(0, "end")
-            self.categoriesdelete(0, "end")
-            self.emplacementsdelete(0, "end")
-            self.etasdelete(0, "end")
+            self.categories.delete(0, "end")
+            self.emplacements.delete(0, "end")
+            self.etas.delete(0, "end")
 
             self.destroy()
 
@@ -36,13 +38,13 @@ class AjouterMateriel(tk.CTkToplevel):
             width=380,
             height=30,
             placeholder_text="Nom du matériel",
-            font=("Arial", 30)
+            font=("Arial", 20)
         )
         
         self.categories = tk.CTkEntry(
             input_contenaire,
             placeholder_text="Catégories",
-            font=("Arial", 30),
+            font=("Arial", 20),
             width=380,
             height=30
         )
@@ -50,7 +52,7 @@ class AjouterMateriel(tk.CTkToplevel):
         self.emplacements = tk.CTkEntry(
             input_contenaire,
             placeholder_text="Emplacements( ex: labo Ginfo)",
-            font=("Arial", 30),
+            font=("Arial", 20),
             width=380,
             height=30
         )
@@ -58,7 +60,7 @@ class AjouterMateriel(tk.CTkToplevel):
         self.etas = tk.CTkEntry(
             input_contenaire,
             placeholder_text="Etat (enddomagé)",
-            font=("Arial", 30),
+            font=("Arial", 20),
             width=380,
             height=30
         )
@@ -70,7 +72,7 @@ class AjouterMateriel(tk.CTkToplevel):
             height=30,
             command=Enregistrer,
             corner_radius=20,
-            font=("Arial", 30)
+            font=("Arial", 20)
         )
 
 
@@ -81,7 +83,7 @@ class AjouterMateriel(tk.CTkToplevel):
             height=30,
             command=annuler,
             corner_radius=20,
-            font=("Arial", 30)
+            font=("Arial", 20)
         )
 
         self.nom.grid(

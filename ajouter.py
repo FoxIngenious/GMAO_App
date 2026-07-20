@@ -33,6 +33,8 @@ class AjouterMateriel(tk.CTkToplevel):
 
             self.destroy()
 
+
+        nom_label = tk.CTkLabel(self, text="Nom du matériel", font=("Arial", 20))
         self.nom = tk.CTkEntry(
             input_contenaire,
             width=380,
@@ -41,6 +43,7 @@ class AjouterMateriel(tk.CTkToplevel):
             font=("Arial", 20)
         )
         
+        categories_label = tk.CTkLabel(self, text="Catégories", font=("Arial", 20))
         self.categories = tk.CTkEntry(
             input_contenaire,
             placeholder_text="Catégories",
@@ -49,6 +52,7 @@ class AjouterMateriel(tk.CTkToplevel):
             height=30
         )
 
+        emplacements_label = tk.CTkLabel(self, text="Emplacements", font=("Arial", 20))
         self.emplacements = tk.CTkEntry(
             input_contenaire,
             placeholder_text="Emplacements( ex: labo Ginfo)",
@@ -57,6 +61,7 @@ class AjouterMateriel(tk.CTkToplevel):
             height=30
         )
 
+        etas_label = tk.CTkLabel(self, text="Etas du matériel", font=("Arial", 20))
         self.etas = tk.CTkEntry(
             input_contenaire,
             placeholder_text="Etat (enddomagé)",
@@ -85,7 +90,6 @@ class AjouterMateriel(tk.CTkToplevel):
             corner_radius=8,
             font=("Arial", 20)
         )
-
         self.nom.grid(
             row=0,
             column=0,

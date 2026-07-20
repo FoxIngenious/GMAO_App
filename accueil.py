@@ -7,7 +7,7 @@ class Acceuill(tk.CTkFrame):
         super().__init__(parent, fg_color="transparent")
 
         titre = tk.CTkLabel(self, text="Gestion de matériel - ISSTM", font=("Arial", 100))
-        titre.pack(pady=50)
+        titre.pack(pady=30)
 
         button_contenaire = tk.CTkFrame(self, fg_color="transparent")
         button_contenaire.pack()

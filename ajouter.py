@@ -71,7 +71,7 @@ class AjouterMateriel(tk.CTkToplevel):
             width=185,
             height=30,
             command=Enregistrer,
-            corner_radius=20,
+            corner_radius=8,
             font=("Arial", 20)
         )
 
@@ -82,7 +82,7 @@ class AjouterMateriel(tk.CTkToplevel):
             width=185,
             height=30,
             command=annuler,
-            corner_radius=20,
+            corner_radius=8,
             font=("Arial", 20)
         )
 

@@ -18,7 +18,6 @@ menu = tk.CTkFrame(app, bg_color="black")
 menu.pack(side="left", fill=tk.Y)
 
 
-
 #=============== conteneur page
 
 page_conteneur = tk.CTkFrame(app, corner_radius=0, fg_color="transparent")
@@ -56,6 +55,10 @@ def side_bar():
     side_bar_page = SideBar(menu, page_acceuil, open_materiels)
     side_bar_page.pack()
 
-
+page_acceuil()
 side_bar()
+
+
+
+
 app.mainloop()

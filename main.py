@@ -9,19 +9,18 @@ tk.set_default_color_theme("green")
 app = tk.CTk()
 app.attributes('-zoomed', True)
 
-def Open_Materiels():
-    print("waiting For it")
+def open_materiels():
+    page_acceuil.pack_forget()
+    page_materiel = ListesMateriels(app)
+    page_materiel.pack(expand=True)
 
-def Ajouter_materiels():
+def ajouter_materiels():
     AjouterMateriel(app)
 
 app.title("Gestion Matériel | ISSTM")
-page_acceuil = Acceuill(app,Open_Materiels,Ajouter_materiels)
+page_acceuil = Acceuill(app,open_materiels,ajouter_materiels)
 page_acceuil.pack(expand=True)
 
-
-liste_materiel = ListesMateriels(app)
-# liste_materiel.pack(fill="both", pady=5)
 
 
 

@@ -3,7 +3,7 @@ import customtkinter as tk
 tk.set_appearance_mode('dark')
 
 class Acceuill(tk.CTkFrame):
-    def __init__(self,parent,Open_Materiels,Ajouter_materiels):
+    def __init__(self,parent,open_materiels,ajouter_materiels):
         super().__init__(parent, fg_color="transparent")
 
         titre = tk.CTkLabel(self, text="Gestion de matériel - ISSTM", font=("Arial", 100))
@@ -18,7 +18,7 @@ class Acceuill(tk.CTkFrame):
             text="Matériels Disponible",
             width=200,
             height=30,
-            command=Open_Materiels,
+            command=open_materiels,
             corner_radius=20,
             font=("Arial", 50)
         )
@@ -28,7 +28,7 @@ class Acceuill(tk.CTkFrame):
             text="+ Nouveau matériels",
             width=200,
             height=30,
-            command=Ajouter_materiels,
+            command=ajouter_materiels,
             corner_radius=20,
             font=("Arial", 50)
         )

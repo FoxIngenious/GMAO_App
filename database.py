@@ -1,4 +1,5 @@
 import sqlite3 as sql
+from pathlib import Path
 
 
 #=======================================Initier la connexion ==============================================
@@ -7,15 +8,16 @@ class DatabaseConnection:
     def __new__(cls):
         if  cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance.db = sql.connect("database.db")
-            cls._instance.cursor = cls._instance.db.cursor()
+            database_path = Path(__file__).resolve().parent / "database.db"
+            cls._instance.db = sql.connect(database_path)
+            cls._instance.db.row_factory = sql.Row
 
         return cls._instance
 
     def get_connection(self):
         return self.db
     def get_cursor(self):
-        return self.db.cursor
+        return self.db.cursor()
 
 
 #========================== Creation des tables =======================

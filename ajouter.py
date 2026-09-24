@@ -1,130 +1,63 @@
 import customtkinter as tk
+from tkinter import messagebox
 
-tk.set_appearance_mode('dark')
-tk.set_default_color_theme("green")
+from models import ajouter_materiel, modifier_materiel
 
 
 class AjouterMateriel(tk.CTkToplevel):
-    def __init__(self, parent):
+    def __init__(self, parent, on_success=None, materiel=None):
         super().__init__(parent)
+        self.materiel = materiel
+        self.title("Modifier le matériel" if materiel else "Ajouter un matériel")
+        self.geometry("500x360")
+        self.resizable(False, False)
+        self.transient(parent)
+        self.grab_set()
+        self.on_success = on_success
 
-        self.title("Ajouter un matériel")
-        self.geometry("500x500")
-
-# ===========================INPUT
         input_contenaire = tk.CTkFrame(self, fg_color="transparent")
         input_contenaire.pack(expand=True)
-
-        def Enregistrer():
-            nom = self.nom.get()
-            categories = self.categories.get()
-            emplacements = self.emplacements.get()
-            etas= self.etas.get()
-
-            # Ajouter_materiel(nom, categories, emplacements, etas) // a importer from models.py
-            self.destroy()
-
-
-        def annuler():
-            self.nom.delete(0, "end")
-            self.categories.delete(0, "end")
-            self.emplacements.delete(0, "end")
-            self.etas.delete(0, "end")
-
-            self.destroy()
-
-
-        nom_label = tk.CTkLabel(self, text="Nom du matériel", font=("Arial", 20))
-        self.nom = tk.CTkEntry(
-            input_contenaire,
-            width=380,
-            height=30,
-            placeholder_text="Nom du matériel",
-            font=("Arial", 20)
+        champs = (
+            ("Nom du matériel", "Nom du matériel", "nom"),
+            ("Catégorie", "Catégorie", "categorie"),
+            ("Emplacement", "Emplacement (ex. labo Ginfo)", "emplacement"),
+            ("État", "État du matériel", "etat"),
         )
-        
-        categories_label = tk.CTkLabel(self, text="Catégories", font=("Arial", 20))
-        self.categories = tk.CTkEntry(
-            input_contenaire,
-            placeholder_text="Catégories",
-            font=("Arial", 20),
-            width=380,
-            height=30
+        for ligne, (libelle, exemple, attribut) in enumerate(champs):
+            tk.CTkLabel(input_contenaire, text=libelle, font=("Arial", 16)).grid(
+                row=ligne * 2, column=0, columnspan=2, sticky="w", pady=(8, 0)
+            )
+            entree = tk.CTkEntry(
+                input_contenaire, width=380, height=30, placeholder_text=exemple, font=("Arial", 16)
+            )
+            entree.grid(row=ligne * 2 + 1, column=0, columnspan=2, pady=(0, 4))
+            if materiel:
+                entree.insert(0, materiel[attribut])
+            setattr(self, attribut, entree)
+
+        tk.CTkButton(input_contenaire, text="Enregistrer", width=185, command=self.enregistrer).grid(
+            row=8, column=0, pady=20
+        )
+        tk.CTkButton(input_contenaire, text="Annuler", width=185, command=self.destroy).grid(
+            row=8, column=1, pady=20
         )
 
-        emplacements_label = tk.CTkLabel(self, text="Emplacements", font=("Arial", 20))
-        self.emplacements = tk.CTkEntry(
-            input_contenaire,
-            placeholder_text="Emplacements( ex: labo Ginfo)",
-            font=("Arial", 20),
-            width=380,
-            height=30
-        )
+    def enregistrer(self):
+        try:
+            valeurs = (self.nom.get(), self.categorie.get(), self.emplacement.get(), self.etat.get())
+            if self.materiel:
+                modifier_materiel(self.materiel["id"], *valeurs)
+            else:
+                ajouter_materiel(*valeurs)
+        except ValueError as erreur:
+            messagebox.showwarning("Champs incomplets", str(erreur), parent=self)
+            return
+        except Exception as erreur:
+            messagebox.showerror(
+                "Erreur", f"Impossible d'enregistrer le matériel : {erreur}", parent=self
+            )
+            return
 
-        etas_label = tk.CTkLabel(self, text="Etas du matériel", font=("Arial", 20))
-        self.etas = tk.CTkEntry(
-            input_contenaire,
-            placeholder_text="Etat (enddomagé)",
-            font=("Arial", 20),
-            width=380,
-            height=30
-        )
-
-        self.enregistrer = tk.CTkButton(
-            input_contenaire,
-            text="Enregistrer",
-            width=185,
-            height=30,
-            command=Enregistrer,
-            corner_radius=8,
-            font=("Arial", 20)
-        )
-
-
-        self.annuler = tk.CTkButton(
-            input_contenaire,
-            text="Annuler",
-            width=185,
-            height=30,
-            command=annuler,
-            corner_radius=8,
-            font=("Arial", 20)
-        )
-        self.nom.grid(
-            row=0,
-            column=0,
-            columnspan = 2,
-            pady=10
-        )
-
-        self.categories.grid(
-            row=1,
-            column=0,
-            columnspan = 2,
-            pady=10
-        )
-
-        self.emplacements.grid(
-            row=2,
-            column=0,
-            columnspan = 2,
-            pady=10
-        )
-
-        self.etas.grid(
-            row=3,
-            column=0,
-            columnspan = 2,
-            pady=10
-        )
-
-        self.enregistrer.grid(
-            row=4,
-            column=0,
-            pady=25
-        )
-        self.annuler.grid(
-            row=4,
-            column=1,
-            pady=25
-        )
+        if self.on_success:
+            self.on_success()
+        self.destroy()

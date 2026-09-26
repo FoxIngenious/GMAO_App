@@ -5,7 +5,6 @@ from impression import imprimer_fiche
 from models import (
     STATUTS_BT,
     ajouter_bon_travail,
-    cloturer_bon,
     lister_bons_travail,
     lister_demandes,
     lister_materiels,
@@ -24,8 +23,7 @@ class GestionBonsTravail(ctk.CTkFrame):
         ctk.CTkButton(actions, text="+ Ajouter", command=self.ajouter).grid(row=0, column=0, padx=5)
         ctk.CTkButton(actions, text="Modifier", command=self.modifier).grid(row=0, column=1, padx=5)
         ctk.CTkButton(actions, text="Supprimer", fg_color="#b33939", command=self.supprimer).grid(row=0, column=2, padx=5)
-        ctk.CTkButton(actions, text="Clôturer", command=self.cloturer).grid(row=0, column=3, padx=5)
-        ctk.CTkButton(actions, text="Imprimer", command=self.imprimer).grid(row=0, column=4, padx=5)
+        ctk.CTkButton(actions, text="Imprimer", command=self.imprimer).grid(row=0, column=3, padx=5)
 
         self.tableau = ttk.Treeview(
             self, columns=("id", "numero", "di", "equipement", "technicien", "statut"),
@@ -74,27 +72,15 @@ class GestionBonsTravail(ctk.CTkFrame):
             supprimer_bon_travail(bon["id"])
             self.rafraichir()
 
-    def cloturer(self):
-        bon = self.bon_selectionne()
-        if bon:
-            FormulaireCloture(self, bon, self.rafraichir)
-
     def imprimer(self):
         bon = self.bon_selectionne()
         if bon:
             donnees = {
                 "N° BT": bon["numero"], "DI": bon["di"], "Équipement": bon["equipement"],
                 "Technicien": bon["technicien"], "Statut": bon["statut"],
+                "Début": bon["date_debut"], "Fin": bon["date_fin"],
                 "Travaux": bon["travaux"],
             }
-            if bon["date_cloture"]:
-                donnees.update({
-                    "Diagnostic": bon["diagnostic"],
-                    "Travail réalisé": bon["travail_realise"],
-                    "Pièces utilisées": bon["pieces"],
-                    "Observations": bon["observations"],
-                    "Résultat": bon["resultat"],
-                })
             imprimer_fiche("Bon de travail", donnees)
 
 
@@ -184,81 +170,3 @@ class FormulaireBonTravail(ctk.CTkToplevel):
         self.on_success()
         self.destroy()
 
-
-class FormulaireCloture(ctk.CTkToplevel):
-    def __init__(self, parent, bon, on_success):
-        super().__init__(parent)
-        self.bon = bon
-        self.on_success = on_success
-        self.title("Clôturer le bon")
-        self.geometry("620x720")
-        self.resizable(False, False)
-        self.transient(parent.winfo_toplevel())
-        self.grab_set()
-
-        ctk.CTkLabel(self, text="Rapport de clôture", font=("Arial", 18, "bold")).pack(pady=(12, 0))
-        ctk.CTkLabel(
-            self,
-            text=f"Bon {bon['numero']}   |   Équipement : {bon['equipement']}   |   Technicien : {bon['technicien']}",
-            font=("Arial", 12), text_color="gray",
-        ).pack(pady=(0, 6))
-        ctk.CTkFrame(self, height=1, fg_color="gray70").pack(fill="x", padx=25, pady=(0, 6))
-
-        conteneur = ctk.CTkFrame(self, fg_color="transparent")
-        conteneur.pack(fill="both", expand=True, padx=25)
-        conteneur.columnconfigure(0, weight=1, uniform="colonne")
-        conteneur.columnconfigure(1, weight=1, uniform="colonne")
-
-        self.diagnostic = self._zone(conteneur, "Diagnostic", bon["diagnostic"], 70, 0, 0, 2)
-        self.travail_realise = self._zone(conteneur, "Travail réalisé", bon["travail_realise"], 70, 2, 0, 2)
-        self.pieces = self._zone(conteneur, "Pièces utilisées", bon["pieces"], 55, 4, 0)
-        self.observations = self._zone(conteneur, "Observations", bon["observations"], 55, 4, 1)
-        self.resultat = self._zone(conteneur, "Résultat", bon["resultat"], 55, 6, 0, 2)
-        self.date_debut = self._champ(conteneur, "Début de l'intervention", bon["date_debut"], 8, 0)
-        self.date_fin = self._champ(conteneur, "Fin de l'intervention", bon["date_fin"], 8, 1)
-
-        ctk.CTkButton(conteneur, text="Valider", width=185, command=self.enregistrer).grid(
-            row=9, column=0, pady=(10, 14)
-        )
-        ctk.CTkButton(conteneur, text="Annuler", width=185, command=self.destroy).grid(
-            row=9, column=1, pady=(10, 14)
-        )
-
-    def _zone(self, parent, libelle, valeur, hauteur, ligne, colonne, etendue=1):
-        ctk.CTkLabel(parent, text=libelle, anchor="w").grid(
-            row=ligne, column=colonne, columnspan=etendue, sticky="ew", pady=(0, 2)
-        )
-        zone = ctk.CTkTextbox(parent, height=hauteur)
-        if valeur:
-            zone.insert("1.0", valeur)
-        zone.grid(
-            row=ligne + 1, column=colonne, columnspan=etendue, sticky="ew", pady=(0, 6)
-        )
-        return zone
-
-    def _champ(self, parent, libelle, valeur, ligne, colonne):
-        ctk.CTkLabel(parent, text=libelle, anchor="w").grid(
-            row=ligne, column=colonne, sticky="ew", pady=(0, 2)
-        )
-        entree = ctk.CTkEntry(parent, height=28)
-        entree.insert(0, valeur or "")
-        entree.grid(row=ligne + 1, column=colonne, sticky="ew", pady=(0, 6))
-        return entree
-
-    def enregistrer(self):
-        try:
-            cloturer_bon(
-                self.bon["id"],
-                self.diagnostic.get("1.0", "end-1c"),
-                self.travail_realise.get("1.0", "end-1c"),
-                self.pieces.get("1.0", "end-1c"),
-                self.observations.get("1.0", "end-1c"),
-                self.resultat.get("1.0", "end-1c"),
-                self.date_debut.get(),
-                self.date_fin.get(),
-            )
-        except ValueError as erreur:
-            messagebox.showwarning("Champs incomplets", str(erreur), parent=self)
-            return
-        self.on_success()
-        self.destroy()

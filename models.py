@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date
 
 from database import DatabaseConnection
 
@@ -48,8 +48,7 @@ TABLES = {
         """,
     ),
     "bons_travail": (
-        "id, numero, di, equipement, technicien, statut, travaux, date_debut, date_fin, "
-        "diagnostic, travail_realise, pieces, observations, resultat, date_cloture",
+        "id, numero, di, equipement, technicien, statut, travaux, date_debut, date_fin",
         """
         CREATE TABLE IF NOT EXISTS bons_travail (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -60,13 +59,7 @@ TABLES = {
             statut TEXT NOT NULL DEFAULT 'À faire',
             travaux TEXT NOT NULL DEFAULT '',
             date_debut TEXT NOT NULL DEFAULT '',
-            date_fin TEXT NOT NULL DEFAULT '',
-            diagnostic TEXT NOT NULL DEFAULT '',
-            travail_realise TEXT NOT NULL DEFAULT '',
-            pieces TEXT NOT NULL DEFAULT '',
-            observations TEXT NOT NULL DEFAULT '',
-            resultat TEXT NOT NULL DEFAULT '',
-            date_cloture TEXT NOT NULL DEFAULT ''
+            date_fin TEXT NOT NULL DEFAULT ''
         )
         """,
     ),
@@ -282,24 +275,3 @@ def supprimer_bon_travail(identifiant):
     connexion.execute("DELETE FROM bons_travail WHERE id = ?", (identifiant,))
     connexion.commit()
 
-
-def cloturer_bon(identifiant, diagnostic, travail_realise, pieces, observations, resultat, date_debut, date_fin):
-    if not all(valeur.strip() for valeur in (diagnostic, travail_realise, resultat)):
-        raise ValueError("Le diagnostic, le travail réalisé et le résultat sont obligatoires.")
-    connexion = DatabaseConnection().get_connection()
-    if not date_fin.strip():
-        date_fin = datetime.now().strftime("%d/%m/%Y %H:%M")
-    connexion.execute(
-        """
-        UPDATE bons_travail
-        SET diagnostic = ?, travail_realise = ?, pieces = ?, observations = ?, resultat = ?,
-            date_debut = ?, date_fin = ?, date_cloture = ?, statut = 'Terminé'
-        WHERE id = ?
-        """,
-        (
-            diagnostic.strip(), travail_realise.strip(), pieces.strip(), observations.strip(),
-            resultat.strip(), date_debut.strip(), date_fin, datetime.now().strftime("%d/%m/%Y %H:%M"),
-            identifiant,
-        ),
-    )
-    connexion.commit()

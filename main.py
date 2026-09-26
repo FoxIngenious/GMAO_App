@@ -18,7 +18,7 @@ try:
 except tk.TclError:
     app.geometry(f"{app.winfo_screenwidth()}x{app.winfo_screenheight()}+0+0")
 
-app.title("Gestion Matériel | Groupe XX")
+app.title("Gestion Matériel | Groupe 02")
 
 
 #=============== page menu

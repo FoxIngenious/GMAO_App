@@ -18,13 +18,15 @@ class ListesMateriels(ctk.CTkFrame):
         ctk.CTkButton(actions, text="Imprimer", command=self.imprimer).grid(row=0, column=3, padx=5)
 
         self.tableau = ttk.Treeview(
-            self, columns=("nom", "categorie", "emplacement", "etat"), show="headings", height=15
+            self, columns=("id", "nom", "categorie", "service", "emplacement", "etat"),
+            show="headings", height=16,
         )
         for colonne, libelle in {
-            "nom": "Nom", "categorie": "Catégorie", "emplacement": "Emplacement", "etat": "État"
+            "id": "ID", "nom": "Nom", "categorie": "Catégorie", "service": "Service",
+            "emplacement": "Emplacement", "etat": "État",
         }.items():
             self.tableau.heading(colonne, text=libelle)
-            self.tableau.column(colonne, anchor="center", width=180)
+            self.tableau.column(colonne, width=150, anchor="center")
         self.tableau.pack(fill="both", expand=True, padx=30, pady=(0, 30))
         self.tableau.bind("<Double-1>", lambda _event: self.modifier())
         self.rafraichir()
@@ -34,7 +36,10 @@ class ListesMateriels(ctk.CTkFrame):
         for materiel in lister_materiels():
             self.tableau.insert(
                 "", "end", iid=str(materiel["id"]),
-                values=(materiel["nom"], materiel["categorie"], materiel["emplacement"], materiel["etat"]),
+                values=(
+                    materiel["id"], materiel["nom"], materiel["categorie"],
+                    materiel["service"], materiel["emplacement"], materiel["etat"],
+                ),
             )
 
     def materiel_selectionne(self):
@@ -62,11 +67,8 @@ class ListesMateriels(ctk.CTkFrame):
     def imprimer(self):
         materiel = self.materiel_selectionne()
         if materiel:
-            try:
-                imprimer_fiche("Fiche matériel", {
-                    "ID": materiel["id"], "Nom": materiel["nom"],
-                    "Catégorie": materiel["categorie"], "Emplacement": materiel["emplacement"],
-                    "État": materiel["etat"],
-                })
-            except OSError as erreur:
-                messagebox.showerror("Impression impossible", str(erreur), parent=self)
+            imprimer_fiche("Fiche matériel", {
+                "ID": materiel["id"], "Nom": materiel["nom"],
+                "Catégorie": materiel["categorie"], "Service": materiel["service"],
+                "Emplacement": materiel["emplacement"], "État": materiel["etat"],
+            })

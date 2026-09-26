@@ -2,7 +2,9 @@ import customtkinter as tk
 
 
 class SideBar(tk.CTkFrame):
-    def __init__(self, parent, page_acceuil, open_materiels, open_demandes, open_bons_travail):
+    def __init__(
+        self, parent, page_acceuil, open_materiels, open_demandes, open_bons_travail, open_techniciens
+    ):
         super().__init__(parent, fg_color="transparent")
 
         menu_contenaire = tk.CTkFrame(self, bg_color="black")
@@ -12,6 +14,7 @@ class SideBar(tk.CTkFrame):
             ("Matériels", open_materiels),
             ("Intervention", open_demandes),
             ("Bons de travail", open_bons_travail),
+            ("Techniciens", open_techniciens),
         ]
 
         for label, command in menus:

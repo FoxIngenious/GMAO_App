@@ -5,6 +5,7 @@ from materiels import ListesMateriels
 from demandes_intervention import GestionDemandesIntervention
 from bons_travail import GestionBonsTravail
 from sideBar import SideBar
+from techniciens import GestionTechniciens
 from models import initialiser_base
 
 tk.set_appearance_mode('dark')
@@ -68,9 +69,14 @@ def open_bons_travail():
     afficher_page(page_bons_travail)
 
 
+def open_techniciens():
+    page_techniciens = GestionTechniciens(page_conteneur)
+    afficher_page(page_techniciens)
+
+
 def side_bar():
     side_bar_page = SideBar(
-        menu, page_acceuil, open_materiels, open_demandes, open_bons_travail
+        menu, page_acceuil, open_materiels, open_demandes, open_bons_travail, open_techniciens
     )
     side_bar_page.pack()
 

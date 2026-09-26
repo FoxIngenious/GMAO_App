@@ -1,197 +1,305 @@
+from datetime import date, datetime
+
 from database import DatabaseConnection
 
+ETATS_MATERIEL = ("Disponible", "En panne", "En maintenance", "Réservé")
+PRIORITES = ("Basse", "Normale", "Haute", "Urgente")
+STATUTS_DI = ("Nouvelle", "En attente", "Prise en charge", "Clôturée", "Annulée")
+STATUTS_BT = ("À faire", "En cours", "Terminé", "Annulé")
 
-def initialiser_base() -> None:
-    """Crée le stockage local de l'application s'il n'existe pas encore."""
-    connexion = DatabaseConnection().get_connection()
-    connexion.execute(
+TABLES = {
+    "materiels": (
+        "id, nom, categorie, emplacement, service, etat",
         """
         CREATE TABLE IF NOT EXISTS materiels (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nom TEXT NOT NULL,
             categorie TEXT NOT NULL,
             emplacement TEXT NOT NULL,
+            service TEXT NOT NULL DEFAULT '',
             etat TEXT NOT NULL
         )
-        """
-    )
-    colonnes_demande = {
-        ligne["name"]
-        for ligne in connexion.execute("PRAGMA table_info(demandes_intervention)").fetchall()
-    }
-    colonnes_attendues = {"id", "description", "technicien", "materiel", "statut"}
-    if colonnes_demande and colonnes_demande != colonnes_attendues:
-        connexion.execute("ALTER TABLE demandes_intervention RENAME TO demandes_intervention_ancienne")
-    connexion.execute(
+        """,
+    ),
+    "demandes_intervention": (
+        "id, numero, equipement, description, demandeur, date_creation, priorite, statut",
         """
         CREATE TABLE IF NOT EXISTS demandes_intervention (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            numero TEXT NOT NULL,
+            equipement TEXT NOT NULL DEFAULT '',
             description TEXT NOT NULL,
-            technicien TEXT NOT NULL,
-            materiel TEXT NOT NULL,
-            statut TEXT NOT NULL
+            demandeur TEXT NOT NULL,
+            date_creation TEXT NOT NULL,
+            priorite TEXT NOT NULL DEFAULT 'Normale',
+            statut TEXT NOT NULL DEFAULT 'Nouvelle'
         )
+        """,
+    ),
+    "techniciens": (
+        "id, nom, specialite, telephone",
         """
-    )
-    if colonnes_demande and colonnes_demande != colonnes_attendues:
-        connexion.execute(
-            """
-            INSERT INTO demandes_intervention (id, description, technicien, materiel, statut)
-            SELECT id, description, '', '', statut FROM demandes_intervention_ancienne
-            """
+        CREATE TABLE IF NOT EXISTS techniciens (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nom TEXT NOT NULL,
+            specialite TEXT NOT NULL DEFAULT '',
+            telephone TEXT NOT NULL DEFAULT ''
         )
-        connexion.execute("DROP TABLE demandes_intervention_ancienne")
-    colonnes_bon = {
-        ligne["name"] for ligne in connexion.execute("PRAGMA table_info(bons_travail)").fetchall()
-    }
-    colonnes_bon_attendues = {"id", "numero_bon", "statut"}
-    if colonnes_bon and colonnes_bon != colonnes_bon_attendues:
-        connexion.execute("ALTER TABLE bons_travail RENAME TO bons_travail_ancien")
-    connexion.execute(
+        """,
+    ),
+    "bons_travail": (
+        "id, numero, di, equipement, technicien, statut, travaux, date_debut, date_fin, "
+        "diagnostic, travail_realise, pieces, observations, resultat, date_cloture",
         """
         CREATE TABLE IF NOT EXISTS bons_travail (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            numero_bon TEXT NOT NULL,
-            statut TEXT NOT NULL
+            numero TEXT NOT NULL,
+            di TEXT NOT NULL DEFAULT '',
+            equipement TEXT NOT NULL DEFAULT '',
+            technicien TEXT NOT NULL DEFAULT '',
+            statut TEXT NOT NULL DEFAULT 'À faire',
+            travaux TEXT NOT NULL DEFAULT '',
+            date_debut TEXT NOT NULL DEFAULT '',
+            date_fin TEXT NOT NULL DEFAULT '',
+            diagnostic TEXT NOT NULL DEFAULT '',
+            travail_realise TEXT NOT NULL DEFAULT '',
+            pieces TEXT NOT NULL DEFAULT '',
+            observations TEXT NOT NULL DEFAULT '',
+            resultat TEXT NOT NULL DEFAULT '',
+            date_cloture TEXT NOT NULL DEFAULT ''
         )
-        """
-    )
-    if colonnes_bon and colonnes_bon != colonnes_bon_attendues:
-        connexion.execute(
-            """
-            INSERT INTO bons_travail (id, numero_bon, statut)
-            SELECT id, titre, statut FROM bons_travail_ancien
-            """
-        )
-        connexion.execute("DROP TABLE bons_travail_ancien")
-    connexion.commit()
-
-
-def ajouter_bon_travail(numero_bon: str, statut: str) -> None:
-    valeurs = (numero_bon.strip(), statut.strip())
-    if not all(valeurs):
-        raise ValueError("Tous les champs sont obligatoires.")
-    connexion = DatabaseConnection().get_connection()
-    connexion.execute(
-        "INSERT INTO bons_travail (numero_bon, statut) VALUES (?, ?)", valeurs
-    )
-    connexion.commit()
-
-
-def lister_bons_travail():
-    connexion = DatabaseConnection().get_connection()
-    return connexion.execute(
-        "SELECT id, numero_bon, statut FROM bons_travail ORDER BY id DESC"
-    ).fetchall()
-
-
-def modifier_bon_travail(identifiant: int, numero_bon: str, statut: str) -> None:
-    valeurs = (numero_bon.strip(), statut.strip())
-    if not all(valeurs):
-        raise ValueError("Tous les champs sont obligatoires.")
-    connexion = DatabaseConnection().get_connection()
-    connexion.execute(
-        "UPDATE bons_travail SET numero_bon = ?, statut = ? WHERE id = ?",
-        (*valeurs, identifiant),
-    )
-    connexion.commit()
-
-
-def supprimer_bon_travail(identifiant: int) -> None:
-    connexion = DatabaseConnection().get_connection()
-    connexion.execute("DELETE FROM bons_travail WHERE id = ?", (identifiant,))
-    connexion.commit()
-
-
-def ajouter_demande(description: str, technicien: str, materiel: str, statut: str) -> None:
-    valeurs = (description.strip(), technicien.strip(), materiel.strip(), statut.strip())
-    if not all(valeurs):
-        raise ValueError("Tous les champs sont obligatoires.")
-    connexion = DatabaseConnection().get_connection()
-    connexion.execute(
-        """
-        INSERT INTO demandes_intervention (description, technicien, materiel, statut)
-        VALUES (?, ?, ?, ?)
         """,
-        valeurs,
-    )
+    ),
+}
+
+
+def _colonnes(connexion, table):
+    return {ligne["name"] for ligne in connexion.execute(f"PRAGMA table_info({table})")}
+
+
+def _prochain_numero(connexion, table, colonne, prefixe):
+    nombre = connexion.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0] + 1
+    return f"{prefixe}-{date.today().year}-{nombre:04d}"
+
+
+def initialiser_base():
+    """Crée les tables de l'application, et les recrée si leur structure a changé."""
+    connexion = DatabaseConnection().get_connection()
+    for table, (colonnes, creation) in TABLES.items():
+        if _colonnes(connexion, table) != set(colonnes.split(", ")):
+            connexion.execute(f"DROP TABLE IF EXISTS {table}")
+        connexion.execute(creation)
     connexion.commit()
 
 
-def lister_demandes():
-    connexion = DatabaseConnection().get_connection()
-    return connexion.execute(
-        """
-        SELECT id, description, technicien, materiel, statut
-        FROM demandes_intervention ORDER BY id DESC
-        """
-    ).fetchall()
-
-
-def modifier_demande(
-    identifiant: int, description: str, technicien: str, materiel: str, statut: str
-) -> None:
-    valeurs = (description.strip(), technicien.strip(), materiel.strip(), statut.strip())
-    if not all(valeurs):
-        raise ValueError("Tous les champs sont obligatoires.")
-    connexion = DatabaseConnection().get_connection()
-    connexion.execute(
-        """
-        UPDATE demandes_intervention
-        SET description = ?, technicien = ?, materiel = ?, statut = ?
-        WHERE id = ?
-        """,
-        (*valeurs, identifiant),
-    )
-    connexion.commit()
-
-
-def supprimer_demande(identifiant: int) -> None:
-    connexion = DatabaseConnection().get_connection()
-    connexion.execute("DELETE FROM demandes_intervention WHERE id = ?", (identifiant,))
-    connexion.commit()
-
-
-
-
-def ajouter_materiel(nom: str, categorie: str, emplacement: str, etat: str) -> None:
+#======================================= Matériels ==============================================
+def ajouter_materiel(nom, categorie, emplacement, service, etat):
     valeurs = (nom.strip(), categorie.strip(), emplacement.strip(), etat.strip())
     if not all(valeurs):
         raise ValueError("Tous les champs sont obligatoires.")
-
     connexion = DatabaseConnection().get_connection()
     connexion.execute(
-        "INSERT INTO materiels (nom, categorie, emplacement, etat) VALUES (?, ?, ?, ?)",
-        valeurs,
+        "INSERT INTO materiels (nom, categorie, emplacement, service, etat) VALUES (?, ?, ?, ?, ?)",
+        (*valeurs, service),
     )
     connexion.commit()
 
 
 def lister_materiels():
     connexion = DatabaseConnection().get_connection()
-    return connexion.execute(
-        "SELECT id, nom, categorie, emplacement, etat FROM materiels ORDER BY id DESC"
-    ).fetchall()
+    return connexion.execute("SELECT * FROM materiels ORDER BY id DESC").fetchall()
 
 
-def modifier_materiel(
-    identifiant: int, nom: str, categorie: str, emplacement: str, etat: str
-) -> None:
+def materiel_par_id(identifiant):
+    connexion = DatabaseConnection().get_connection()
+    return connexion.execute("SELECT * FROM materiels WHERE id = ?", (identifiant,)).fetchone()
+
+
+def modifier_materiel(identifiant, nom, categorie, emplacement, service, etat):
     valeurs = (nom.strip(), categorie.strip(), emplacement.strip(), etat.strip())
     if not all(valeurs):
         raise ValueError("Tous les champs sont obligatoires.")
     connexion = DatabaseConnection().get_connection()
     connexion.execute(
-        """
-        UPDATE materiels SET nom = ?, categorie = ?, emplacement = ?, etat = ?
-        WHERE id = ?
-        """,
-        (*valeurs, identifiant),
+        "UPDATE materiels SET nom = ?, categorie = ?, emplacement = ?, service = ?, etat = ? WHERE id = ?",
+        (*valeurs, service, identifiant),
     )
     connexion.commit()
 
 
-def supprimer_materiel(identifiant: int) -> None:
+def supprimer_materiel(identifiant):
     connexion = DatabaseConnection().get_connection()
     connexion.execute("DELETE FROM materiels WHERE id = ?", (identifiant,))
+    connexion.execute("UPDATE materiels SET id = id - 1 WHERE id > ?", (identifiant,))
+    connexion.execute("DELETE FROM sqlite_sequence WHERE name = 'materiels'")
+    connexion.commit()
+
+
+#======================================= Demandes d'intervention ==============================================
+def ajouter_demande(equipement, description, demandeur, priorite, statut):
+    valeurs = (description.strip(), demandeur.strip())
+    if not all(valeurs):
+        raise ValueError("Tous les champs sont obligatoires.")
+    connexion = DatabaseConnection().get_connection()
+    numero = _prochain_numero(connexion, "demandes_intervention", "numero", "DI")
+    connexion.execute(
+        """
+        INSERT INTO demandes_intervention (numero, equipement, description, demandeur, date_creation, priorite, statut)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (numero, equipement, *valeurs, date.today().isoformat(), priorite, statut),
+    )
+    connexion.commit()
+    return numero
+
+
+def lister_demandes():
+    connexion = DatabaseConnection().get_connection()
+    return connexion.execute("SELECT * FROM demandes_intervention ORDER BY id DESC").fetchall()
+
+
+def demande_par_id(identifiant):
+    connexion = DatabaseConnection().get_connection()
+    return connexion.execute("SELECT * FROM demandes_intervention WHERE id = ?", (identifiant,)).fetchone()
+
+
+def modifier_demande(identifiant, equipement, description, demandeur, priorite, statut):
+    valeurs = (description.strip(), demandeur.strip())
+    if not all(valeurs):
+        raise ValueError("Tous les champs sont obligatoires.")
+    connexion = DatabaseConnection().get_connection()
+    connexion.execute(
+        """
+        UPDATE demandes_intervention
+        SET equipement = ?, description = ?, demandeur = ?, priorite = ?, statut = ?
+        WHERE id = ?
+        """,
+        (equipement, *valeurs, priorite, statut, identifiant),
+    )
+    connexion.commit()
+
+
+def supprimer_demande(identifiant):
+    connexion = DatabaseConnection().get_connection()
+    connexion.execute("DELETE FROM demandes_intervention WHERE id = ?", (identifiant,))
+    connexion.commit()
+
+
+#======================================= Techniciens ==============================================
+def ajouter_technicien(nom, specialite, telephone):
+    if not nom.strip():
+        raise ValueError("Le nom du technicien est obligatoire.")
+    connexion = DatabaseConnection().get_connection()
+    connexion.execute(
+        "INSERT INTO techniciens (nom, specialite, telephone) VALUES (?, ?, ?)",
+        (nom.strip(), specialite.strip(), telephone.strip()),
+    )
+    connexion.commit()
+
+
+def lister_techniciens():
+    connexion = DatabaseConnection().get_connection()
+    return connexion.execute("SELECT * FROM techniciens ORDER BY nom").fetchall()
+
+
+def technicien_par_id(identifiant):
+    connexion = DatabaseConnection().get_connection()
+    return connexion.execute("SELECT * FROM techniciens WHERE id = ?", (identifiant,)).fetchone()
+
+
+def modifier_technicien(identifiant, nom, specialite, telephone):
+    if not nom.strip():
+        raise ValueError("Le nom du technicien est obligatoire.")
+    connexion = DatabaseConnection().get_connection()
+    connexion.execute(
+        "UPDATE techniciens SET nom = ?, specialite = ?, telephone = ? WHERE id = ?",
+        (nom.strip(), specialite.strip(), telephone.strip(), identifiant),
+    )
+    connexion.commit()
+
+
+def supprimer_technicien(identifiant):
+    connexion = DatabaseConnection().get_connection()
+    connexion.execute("DELETE FROM techniciens WHERE id = ?", (identifiant,))
+    connexion.commit()
+
+
+#======================================= Bons de travail ==============================================
+def ajouter_bon_travail(numero, di, equipement, technicien, statut, travaux, date_debut, date_fin):
+    if not travaux.strip():
+        raise ValueError("Les travaux à effectuer sont obligatoires.")
+    connexion = DatabaseConnection().get_connection()
+    if not numero.strip():
+        numero = _prochain_numero(connexion, "bons_travail", "numero", "BT")
+    connexion.execute(
+        """
+        INSERT INTO bons_travail
+            (numero, di, equipement, technicien, statut, travaux, date_debut, date_fin)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            numero.strip(), di.strip(), equipement, technicien, statut, travaux.strip(),
+            date_debut.strip(), date_fin.strip(),
+        ),
+    )
+    connexion.commit()
+    return numero.strip()
+
+
+def lister_bons_travail():
+    connexion = DatabaseConnection().get_connection()
+    return connexion.execute("SELECT * FROM bons_travail ORDER BY id DESC").fetchall()
+
+
+def bon_travail_par_id(identifiant):
+    connexion = DatabaseConnection().get_connection()
+    return connexion.execute("SELECT * FROM bons_travail WHERE id = ?", (identifiant,)).fetchone()
+
+
+def modifier_bon_travail(identifiant, numero, di, equipement, technicien, statut, travaux, date_debut, date_fin):
+    if not travaux.strip():
+        raise ValueError("Les travaux à effectuer sont obligatoires.")
+    connexion = DatabaseConnection().get_connection()
+    if not numero.strip():
+        numero = f"BT-{date.today().year}-{identifiant:04d}"
+    connexion.execute(
+        """
+        UPDATE bons_travail
+        SET numero = ?, di = ?, equipement = ?, technicien = ?, statut = ?, travaux = ?,
+            date_debut = ?, date_fin = ?
+        WHERE id = ?
+        """,
+        (
+            numero.strip(), di.strip(), equipement, technicien, statut, travaux.strip(),
+            date_debut.strip(), date_fin.strip(), identifiant,
+        ),
+    )
+    connexion.commit()
+
+
+def supprimer_bon_travail(identifiant):
+    connexion = DatabaseConnection().get_connection()
+    connexion.execute("DELETE FROM bons_travail WHERE id = ?", (identifiant,))
+    connexion.commit()
+
+
+def cloturer_bon(identifiant, diagnostic, travail_realise, pieces, observations, resultat, date_debut, date_fin):
+    if not all(valeur.strip() for valeur in (diagnostic, travail_realise, resultat)):
+        raise ValueError("Le diagnostic, le travail réalisé et le résultat sont obligatoires.")
+    connexion = DatabaseConnection().get_connection()
+    if not date_fin.strip():
+        date_fin = datetime.now().strftime("%d/%m/%Y %H:%M")
+    connexion.execute(
+        """
+        UPDATE bons_travail
+        SET diagnostic = ?, travail_realise = ?, pieces = ?, observations = ?, resultat = ?,
+            date_debut = ?, date_fin = ?, date_cloture = ?, statut = 'Terminé'
+        WHERE id = ?
+        """,
+        (
+            diagnostic.strip(), travail_realise.strip(), pieces.strip(), observations.strip(),
+            resultat.strip(), date_debut.strip(), date_fin, datetime.now().strftime("%d/%m/%Y %H:%M"),
+            identifiant,
+        ),
+    )
     connexion.commit()

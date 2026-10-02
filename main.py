@@ -2,15 +2,23 @@ import customtkinter as tk
 from accueil import  Acceuill
 from ajouter import AjouterMateriel
 from materiels import ListesMateriels
+from demandes_intervention import GestionDemandesIntervention
+from bons_travail import GestionBonsTravail
 from sideBar import SideBar
+from techniciens import GestionTechniciens
+from models import initialiser_base
 
 tk.set_appearance_mode('dark')
 tk.set_default_color_theme("green")
 
 app = tk.CTk()
-app.attributes('-zoomed', True)
+initialiser_base()
+try:
+    app.state("zoomed")
+except tk.TclError:
+    app.geometry(f"{app.winfo_screenwidth()}x{app.winfo_screenheight()}+0+0")
 
-app.title("Gestion Matériel | Groupe XX")
+app.title("Gestion Matériel | Groupe 02")
 
 
 #=============== page menu
@@ -31,7 +39,7 @@ def afficher_page(nouvel_page):
     global page_active
 
     if page_active is not None:
-        page_active.pack_forget()
+        page_active.destroy()
 
     nouvel_page.pack(fill ="both", expand=True)
     page_active = nouvel_page
@@ -40,7 +48,7 @@ def afficher_page(nouvel_page):
 
 
 def ajouter_materiels():
-    AjouterMateriel(app)
+    AjouterMateriel(app, open_materiels)
 
 def page_acceuil():
     home = Acceuill(page_conteneur,open_materiels,ajouter_materiels)
@@ -51,8 +59,25 @@ def open_materiels():
     afficher_page(page_materiel)
 
 
+def open_demandes():
+    page_demandes = GestionDemandesIntervention(page_conteneur)
+    afficher_page(page_demandes)
+
+
+def open_bons_travail():
+    page_bons_travail = GestionBonsTravail(page_conteneur)
+    afficher_page(page_bons_travail)
+
+
+def open_techniciens():
+    page_techniciens = GestionTechniciens(page_conteneur)
+    afficher_page(page_techniciens)
+
+
 def side_bar():
-    side_bar_page = SideBar(menu, page_acceuil, open_materiels)
+    side_bar_page = SideBar(
+        menu, page_acceuil, open_materiels, open_demandes, open_bons_travail, open_techniciens
+    )
     side_bar_page.pack()
 
 page_acceuil()

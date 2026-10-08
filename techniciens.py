@@ -2,7 +2,7 @@ import customtkinter as ctk
 from tkinter import messagebox, ttk
 
 from impression import imprimer_fiche
-from models import (
+from api_client import (
     ajouter_technicien,
     lister_techniciens,
     modifier_technicien,

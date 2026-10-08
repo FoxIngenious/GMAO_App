@@ -4,31 +4,24 @@ from pathlib import Path
 
 #=======================================Initier la connexion ==============================================
 class DatabaseConnection:
-    _instance = None
-    def __new__(cls):
-        if  cls._instance is None:
-            cls._instance = super().__new__(cls)
-            database_path = Path(__file__).resolve().parent / "database.db"
-            cls._instance.db = sql.connect(database_path)
-            cls._instance.db.row_factory = sql.Row
-
-        return cls._instance
+    chemin = Path(__file__).resolve().parent / "database.db"
 
     def get_connection(self):
-        return self.db
+        connexion = sql.connect(self.chemin)
+        connexion.row_factory = sql.Row
+        return connexion
+
     def get_cursor(self):
-        return self.db.cursor()
+        return self.get_connection().cursor()
 
 
 #========================== Creation des tables =======================
 
 class CreateTable:
-    def __init__(self ):
+    def __init__(self):
         self.conn = DatabaseConnection().get_connection()
         self.cursor = self.conn.cursor()
 
-    def create_table(self, nom_table,colonnes):
+    def create_table(self, nom_table, colonnes):
         self.cursor.execute(f"CREATE TABLE  IF NOT EXISTS {nom_table} ({colonnes})")
         self.conn.commit()
-
-

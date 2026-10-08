@@ -3,7 +3,7 @@ from tkinter import messagebox, ttk
 
 from ajouter import AjouterMateriel
 from impression import imprimer_fiche
-from models import lister_materiels, supprimer_materiel
+from api_client import lister_materiels, supprimer_materiel
 
 
 class ListesMateriels(ctk.CTkFrame):
@@ -18,12 +18,12 @@ class ListesMateriels(ctk.CTkFrame):
         ctk.CTkButton(actions, text="Imprimer", command=self.imprimer).grid(row=0, column=3, padx=5)
 
         self.tableau = ttk.Treeview(
-            self, columns=("id", "nom", "categorie", "service", "emplacement", "etat"),
+            self, columns=("id", "code", "nom", "categorie", "service", "emplacement", "etat"),
             show="headings", height=16,
         )
         for colonne, libelle in {
-            "id": "ID", "nom": "Nom", "categorie": "Catégorie", "service": "Service",
-            "emplacement": "Emplacement", "etat": "État",
+            "id": "ID", "code": "Code", "nom": "Nom", "categorie": "Catégorie",
+            "service": "Service", "emplacement": "Emplacement", "etat": "État",
         }.items():
             self.tableau.heading(colonne, text=libelle)
             self.tableau.column(colonne, width=150, anchor="center")
@@ -37,7 +37,7 @@ class ListesMateriels(ctk.CTkFrame):
             self.tableau.insert(
                 "", "end", iid=str(materiel["id"]),
                 values=(
-                    materiel["id"], materiel["nom"], materiel["categorie"],
+                    materiel["id"], materiel["code"], materiel["nom"], materiel["categorie"],
                     materiel["service"], materiel["emplacement"], materiel["etat"],
                 ),
             )
@@ -68,7 +68,7 @@ class ListesMateriels(ctk.CTkFrame):
         materiel = self.materiel_selectionne()
         if materiel:
             imprimer_fiche("Fiche matériel", {
-                "ID": materiel["id"], "Nom": materiel["nom"],
+                "ID": materiel["id"], "Code": materiel["code"], "Nom": materiel["nom"],
                 "Catégorie": materiel["categorie"], "Service": materiel["service"],
                 "Emplacement": materiel["emplacement"], "État": materiel["etat"],
             })

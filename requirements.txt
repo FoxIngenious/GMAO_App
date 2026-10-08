@@ -1,3 +1,7 @@
 customtkinter
 datetime
 pathlib
+fastapi
+uvicorn
+requests
+pydantic

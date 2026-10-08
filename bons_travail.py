@@ -2,9 +2,9 @@ import customtkinter as ctk
 from tkinter import messagebox, ttk
 
 from impression import imprimer_fiche
-from models import (
-    STATUTS_BT,
+from api_client import (
     ajouter_bon_travail,
+    cloturer_bon_travail,
     lister_bons_travail,
     lister_demandes,
     lister_materiels,
@@ -12,18 +12,22 @@ from models import (
     modifier_bon_travail,
     supprimer_bon_travail,
 )
+from models import STATUTS_BT
 
 
 class GestionBonsTravail(ctk.CTkFrame):
-    def __init__(self, parent):
+    def __init__(self, parent, utilisateur=None):
         super().__init__(parent)
+        self.utilisateur = utilisateur or {}
+        self.role_technicien = self.utilisateur.get("role") == "Technicien"
         ctk.CTkLabel(self, text="Bons de travail", font=("Arial", 36)).pack(pady=(20, 10))
         actions = ctk.CTkFrame(self, fg_color="transparent")
         actions.pack(pady=(0, 12))
         ctk.CTkButton(actions, text="+ Ajouter", command=self.ajouter).grid(row=0, column=0, padx=5)
         ctk.CTkButton(actions, text="Modifier", command=self.modifier).grid(row=0, column=1, padx=5)
-        ctk.CTkButton(actions, text="Supprimer", fg_color="#b33939", command=self.supprimer).grid(row=0, column=2, padx=5)
-        ctk.CTkButton(actions, text="Imprimer", command=self.imprimer).grid(row=0, column=3, padx=5)
+        ctk.CTkButton(actions, text="Rapport / Clôturer", fg_color="#0984e3", command=self.rapport).grid(row=0, column=2, padx=5)
+        ctk.CTkButton(actions, text="Supprimer", fg_color="#b33939", command=self.supprimer).grid(row=0, column=3, padx=5)
+        ctk.CTkButton(actions, text="Imprimer", command=self.imprimer).grid(row=0, column=4, padx=5)
 
         self.tableau = ttk.Treeview(
             self, columns=("id", "numero", "di", "equipement", "technicien", "statut"),
@@ -41,7 +45,10 @@ class GestionBonsTravail(ctk.CTkFrame):
 
     def rafraichir(self):
         self.tableau.delete(*self.tableau.get_children())
-        for bon in lister_bons_travail():
+        bons = lister_bons_travail()
+        if self.role_technicien:
+            bons = [b for b in bons if b["technicien"] == self.utilisateur.get("nom")]
+        for bon in bons:
             self.tableau.insert(
                 "", "end", iid=str(bon["id"]),
                 values=(
@@ -66,6 +73,11 @@ class GestionBonsTravail(ctk.CTkFrame):
         if bon:
             FormulaireBonTravail(self, self.rafraichir, bon)
 
+    def rapport(self):
+        bon = self.bon_selectionne()
+        if bon:
+            DialogRapport(self, self.rafraichir, bon)
+
     def supprimer(self):
         bon = self.bon_selectionne()
         if bon and messagebox.askyesno("Confirmer", "Supprimer ce bon de travail ?", parent=self):
@@ -81,7 +93,67 @@ class GestionBonsTravail(ctk.CTkFrame):
                 "Début": bon["date_debut"], "Fin": bon["date_fin"],
                 "Travaux": bon["travaux"],
             }
+            if bon.get("duree") or bon.get("cause") or bon.get("taches_realisees"):
+                donnees.update({
+                    "Durée (h)": bon["duree"], "Cause": bon["cause"],
+                    "Tâches réalisées": bon["taches_realisees"],
+                })
             imprimer_fiche("Bon de travail", donnees)
+
+
+class DialogRapport(ctk.CTkToplevel):
+    def __init__(self, parent, on_success, bon):
+        super().__init__(parent)
+        self.bon = bon
+        self.on_success = on_success
+        self.title("Rapport d'intervention")
+        self.geometry("520x520")
+        self.resizable(False, False)
+        self.transient(parent.winfo_toplevel())
+        self.grab_set()
+
+        conteneur = ctk.CTkFrame(self, fg_color="transparent")
+        conteneur.pack(expand=True, padx=25)
+
+        ctk.CTkLabel(
+            conteneur, text=f"{bon['numero']} — {bon['equipement']}",
+            font=("Arial", 18),
+        ).pack(pady=(0, 16))
+
+        ctk.CTkLabel(conteneur, text="Temps passé (heures)").pack(anchor="w")
+        self.duree = ctk.CTkEntry(conteneur, width=420)
+        self.duree.pack(pady=(2, 10))
+
+        ctk.CTkLabel(conteneur, text="Cause de la panne").pack(anchor="w")
+        self.cause = ctk.CTkEntry(conteneur, width=420)
+        self.cause.pack(pady=(2, 10))
+
+        ctk.CTkLabel(conteneur, text="Tâches réalisées").pack(anchor="w")
+        self.taches = ctk.CTkTextbox(conteneur, height=140, width=420)
+        self.taches.pack(pady=(2, 16))
+
+        boutons = ctk.CTkFrame(conteneur, fg_color="transparent")
+        boutons.pack()
+        ctk.CTkButton(boutons, text="Clôturer", width=180, command=self.cloturer).pack(side="left", padx=5)
+        ctk.CTkButton(boutons, text="Annuler", width=180, command=self.destroy).pack(side="left", padx=5)
+
+    def cloturer(self):
+        try:
+            cloturer_bon_travail(
+                self.bon["id"], self.duree.get(),
+                self.cause.get(), self.taches.get("1.0", "end-1c"),
+            )
+        except ValueError as erreur:
+            messagebox.showwarning("Champs incomplets", str(erreur), parent=self)
+            return
+        messagebox.showinfo(
+            "Bon clôturé",
+            f"{self.bon['numero']} est clôturé. Le matériel {self.bon['equipement']} "
+            "a été remis en marche automatiquement.",
+            parent=self,
+        )
+        self.on_success()
+        self.destroy()
 
 
 class FormulaireBonTravail(ctk.CTkToplevel):
@@ -106,7 +178,8 @@ class FormulaireBonTravail(ctk.CTkToplevel):
             bon["di"] if bon else "", 0, 1,
         )
         self.equipement = self._choix(
-            conteneur, "Équipement", [materiel["nom"] for materiel in lister_materiels()],
+            conteneur, "Équipement",
+            [f"{m['code']} — {m['nom']}" for m in lister_materiels()],
             bon["equipement"] if bon else "", 1, 0,
         )
         self.technicien = self._choix(
@@ -155,8 +228,9 @@ class FormulaireBonTravail(ctk.CTkToplevel):
 
     def enregistrer(self):
         try:
+            equipement = self.equipement.get().split(" — ")[0].strip()
             valeurs = (
-                self.numero.get(), self.di.get(), self.equipement.get(), self.technicien.get(),
+                self.numero.get(), self.di.get(), equipement, self.technicien.get(),
                 self.statut.get(), self.travaux.get("1.0", "end-1c"),
                 self.date_debut.get(), self.date_fin.get(),
             )
